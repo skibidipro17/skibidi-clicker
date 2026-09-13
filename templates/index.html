@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#06060b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>СКИБИДИ КЛИКЕР</title>
+<style>
+:root {
+  --bg: #06060b; --bg2: #0d0d16; --card: #14141e; --card2: #1c1c28;
+  --text: #ffffff; --text2: #9a9aab; --text3: #5a5a6a; --border: #24243a;
+  --accent: #00e676; --accent-glow: rgba(0,230,118,0.4);
+  --warn: #ffcc00; --danger: #ff4757; --purple: #a855f7; --pink: #ec4899;
+}
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+}
+html, body {
+  overscroll-behavior: none; overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: fixed; width: 100%; height: 100%;
+}
+body {
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(0,230,118,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(168,85,247,0.06) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+#app-scroll { width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 100px; position: relative; padding-top: env(safe-area-inset-top); }
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; position: sticky; top: 0;
+  background: rgba(6,6,11,0.9); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); z-index: 50;
+  border-bottom: 1px solid var(--border);
+}
+.header-user { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, #00e676, #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 14px rgba(0,230,118,0.3);
+}
+.username { font-size: 14px; font-weight: 700; }
+.user-status { font-size: 11px; color: var(--accent); display: flex; align-items: center; gap: 4px; }
+.user-status::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 50% { opacity: 0.3; } }
+.header-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; color: var(--text); cursor: pointer;
+}
+.icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+.badge-dot {
+  position: absolute; top: -3px; right: -3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--danger); font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: white; border: 2px solid var(--bg);
+}
+.coin-section { padding: 24px 18px 10px; text-align: center; }
+.balance-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+.balance {
+  font-size: 42px; font-weight: 900; letter-spacing: -1.5px;
+  background: linear-gradient(135deg, #fff, #00e676);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1.1; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;
+}
+.balance .coin-icon { width: 32px; height: 32px; -webkit-text-fill-color: initial; font-size: 30px; }
+.income-row { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 13px; color: var(--text2); }
+.income-item {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--card); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+}
+.income-item b { color: var(--accent); font-weight: 700; }
+.coin-area { padding: 10px 20px 20px; display: flex; align-items: center; justify-content: center; position: relative; min-height: 340px; }
+.coin-btn {
+  width: 280px; height: 280px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4b5563, #1f2937 50%, #0a0a0a);
+  position: relative; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform 0.08s;
+  box-shadow:
+    0 0 0 8px rgba(0,230,118,0.1), 0 0 0 16px rgba(0,230,118,0.05),
+    0 30px 60px rgba(0,0,0,0.6), inset 0 -12px 30px rgba(0,0,0,0.5),
+    inset 0 12px 30px rgba(255,255,255,0.05);
+  border: none; padding: 0;
+}
+.coin-btn:active { transform: scale(0.94); }
+.coin-btn::before {
+  content: ''; position: absolute; inset: -20px; border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow), transparent 60%);
+  opacity: 0.6; animation: pulse-glow 2s ease-in-out infinite; pointer-events: none;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+.coin-inner {
+  width: 78%; height: 78%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2d3748, #111 80%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+}
+.coin-inner::before {
+  content: ''; position: absolute; inset: 0;
+  background: conic-gradient(from 0deg, transparent, rgba(0,230,118,0.15), transparent 30%, transparent 70%, rgba(0,230,118,0.15), transparent);
+  animation: rotate 6s linear infinite;
+}
+@keyframes rotate { to { transform: rotate(360deg); } }
+.coin-emoji {
+  font-size: 120px; position: relative; z-index: 2;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)) drop-shadow(0 0 30px rgba(0,230,118,0.5));
+  transition: transform 0.1s; pointer-events: none;
+}
+.coin-btn.tapping .coin-emoji { transform: scale(1.15) rotate(-8deg); }
+.coin-btn.skibidi-brr { animation: brr 0.3s; }
+@keyframes brr {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(-4px, 2px) rotate(-2deg); }
+  50% { transform: translate(4px, -2px) rotate(2deg); }
+  75% { transform: translate(-2px, 4px) rotate(-1deg); }
+}
+.combo {
+  position: absolute; top: 30px; right: 30px;
+  background: linear-gradient(135deg, #ff4757, #ec4899);
+  color: white; font-size: 14px; font-weight: 900;
+  padding: 8px 14px; border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(255,71,87,0.5);
+  opacity: 0; transition: opacity 0.2s; pointer-events: none;
+}
+.combo.show { opacity: 1; }
+.float-text {
+  position: absolute; font-size: 22px; font-weight: 900; color: var(--accent);
+  text-shadow: 0 0 12px var(--accent-glow), 0 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 100; white-space: nowrap;
+}
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-100px) scale(1.4); }
+}
+.float-text.skibidi {
+  color: var(--purple); text-shadow: 0 0 12px rgba(168,85,247,0.8), 0 2px 4px rgba(0,0,0,0.8);
+  font-size: 18px; font-style: italic;
+}
+.energy-display {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  background: var(--card); padding: 8px 18px; border-radius: 20px;
+  border: 1px solid var(--border); font-size: 13px;
+  display: flex; align-items: center; gap: 6px;
+}
+.energy-display b { color: var(--warn); }
+.tabs-nav {
+  display: flex; gap: 4px; padding: 8px 18px 12px;
+  overflow-x: auto; scrollbar-width: none;
+  position: sticky; top: 68px; background: var(--bg); z-index: 40;
+}
+.tabs-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 10px 16px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text2); font-size: 13px; font-weight: 600;
+  white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, #00e676, #00c853);
+  border-color: transparent; color: #000; font-weight: 800;
+  box-shadow: 0 4px 14px rgba(0,230,118,0.4);
+}
+.section { padding: 0 18px; display: none; }
+.section.active { display: block; animation: fadeIn 0.25s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.section-title { font-size: 15px; font-weight: 800; margin: 16px 0 10px; display: flex; align-items: center; gap: 8px; }
+.upgrade-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 14px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 14px; cursor: pointer; transition: transform 0.1s;
+}
+.upgrade-card:active { transform: scale(0.98); }
+.upgrade-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--u1), var(--u2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4); position: relative;
+}
+.upgrade-icon .lvl {
+  position: absolute; bottom: -4px; right: -4px;
+  background: var(--accent); color: #000;
+  font-size: 10px; font-weight: 800; padding: 2px 7px;
+  border-radius: 8px; border: 2px solid var(--card); min-width: 20px; text-align: center;
+}
+.upgrade-body { flex: 1; min-width: 0; }
+.upgrade-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.upgrade-desc { font-size: 11px; color: var(--text2); margin-bottom: 5px; line-height: 1.4; }
+.upgrade-effect { font-size: 12px; color: var(--accent); font-weight: 700; }
+.upgrade-price {
+  background: var(--card2); border: 1px solid var(--border);
+  padding: 8px 12px; border-radius: 10px;
+  font-size: 12px; font-weight: 800; text-align: center;
+  min-width: 90px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.upgrade-price.can-afford {
+  background: linear-gradient(135deg, rgba(0,230,118,0.2), rgba(0,230,118,0.05));
+  border-color: var(--accent); color: var(--accent);
+}
+.ref-hero {
+  background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.1));
+  border: 1px solid rgba(168,85,247,0.3); border-radius: 18px;
+  padding: 20px; text-align: center; margin-bottom: 14px;
+}
+.ref-hero .emoji { font-size: 48px; margin-bottom: 8px; }
+.ref-hero h3 { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+.ref-hero p { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 16px; }
+.ref-bonus-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+.ref-bonus {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 8px 12px; font-size: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ref-bonus b { color: var(--accent); }
+.code-box {
+  background: var(--card); border: 2px dashed var(--accent);
+  border-radius: 14px; padding: 14px; text-align: center; margin-bottom: 12px;
+}
+.code-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+.code-value {
+  font-family: 'Courier New', monospace; font-size: 24px; font-weight: 900;
+  letter-spacing: 3px; color: var(--accent); margin-bottom: 10px;
+  text-shadow: 0 0 14px var(--accent-glow);
+}
+.btn-copy {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  color: white; font-size: 13px; font-weight: 700;
+  padding: 10px 20px; border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: none;
+}
+.friend-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.friend-avatar {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.friend-info { flex: 1; min-width: 0; }
+.friend-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.friend-meta { font-size: 11px; color: var(--text3); }
+.friend-bonus { font-size: 12px; font-weight: 800; color: var(--accent); text-align: right; }
+.friend-bonus small { display: block; font-size: 10px; color: var(--text3); font-weight: 500; }
+.achievement {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.achievement.done {
+  background: linear-gradient(135deg, rgba(0,230,118,0.1), transparent);
+  border-color: var(--accent);
+}
+.ach-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--card2); display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0; filter: grayscale(1) opacity(0.5);
+}
+.achievement.done .ach-icon { filter: none; background: rgba(0,230,118,0.15); }
+.ach-body { flex: 1; }
+.ach-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.ach-reward { font-size: 12px; font-weight: 800; color: var(--accent); }
+.skins-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.skin {
+  aspect-ratio: 1; background: var(--card); border: 2px solid var(--border);
+  border-radius: 14px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 8px; cursor: pointer; gap: 4px;
+}
+.skin.active { border-color: var(--accent); background: rgba(0,230,118,0.1); }
+.skin.owned { border-color: var(--purple); }
+.skin-emoji { font-size: 40px; }
+.skin-name { font-size: 10px; font-weight: 700; text-align: center; }
+.skin-price { font-size: 10px; color: var(--text3); }
+.skin.active .skin-price { color: var(--accent); }
+.leader-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 6px;
+}
+.leader-row.me {
+  background: linear-gradient(135deg, rgba(0,230,118,0.15), transparent);
+  border-color: var(--accent);
+}
+.leader-rank { width: 30px; font-size: 14px; font-weight: 900; color: var(--text3); text-align: center; flex-shrink: 0; }
+.leader-rank.top1 { color: #ffd700; }
+.leader-rank.top2 { color: #c0c0c0; }
+.leader-rank.top3 { color: #cd7f32; }
+.leader-avatar {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--card2); display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.leader-name { flex: 1; font-size: 13px; font-weight: 700; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leader-score { font-size: 13px; font-weight: 800; color: var(--accent); }
+.daily-card {
+  background: linear-gradient(135deg, #ffcc00, #ff6b00);
+  border-radius: 16px; padding: 18px; text-align: center;
+  margin-bottom: 12px; color: #000;
+}
+.daily-title { font-size: 16px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.daily-desc { font-size: 13px; font-weight: 600; margin-bottom: 12px; opacity: 0.8; }
+.daily-btn {
+  background: #000; color: #ffcc00;
+  padding: 10px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 800; cursor: pointer; border: none;
+}
+.daily-btn:disabled { background: rgba(0,0,0,0.3); color: rgba(0,0,0,0.5); cursor: not-allowed; }
+.prophecy {
+  background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.1));
+  border: 1px solid rgba(168,85,247,0.4); border-radius: 16px;
+  padding: 16px; margin-bottom: 12px; text-align: center;
+}
+.prophecy-label { font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; margin-bottom: 8px; }
+.prophecy-text { font-size: 14px; font-weight: 600; line-height: 1.5; font-style: italic; }
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: rgba(13,13,22,0.95); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); display: flex;
+  padding: 8px 6px calc(12px + env(safe-area-inset-bottom)); z-index: 80;
+}
+.bottom-nav-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; padding: 6px 4px;
+  font-size: 10px; color: var(--text3); border-radius: 10px;
+  cursor: pointer; background: none; border: none;
+}
+.bottom-nav-btn.active { color: var(--accent); }
+.bottom-nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+.bottom-nav-btn.active svg { fill: rgba(0,230,118,0.15); }
+.toast {
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--card); border: 1px solid var(--accent);
+  padding: 12px 20px; border-radius: 14px;
+  font-size: 14px; font-weight: 700; z-index: 300;
+  opacity: 0; transition: all 0.3s;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  display: flex; align-items: center; gap: 8px;
+  max-width: 90%; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px); display: none;
+  align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+}
+.modal-bg.show { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 26px 22px;
+  max-width: 380px; width: 100%; text-align: center;
+  animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal-emoji { font-size: 60px; margin-bottom: 12px; }
+.modal-title { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
+.modal-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+.modal-bonus {
+  font-size: 22px; font-weight: 900; color: var(--accent);
+  margin-bottom: 20px; text-shadow: 0 0 20px var(--accent-glow);
+}
+.btn-primary {
+  background: linear-gradient(135deg, #00e676, #00c853);
+  color: #000; padding: 14px 28px; border-radius: 12px;
+  font-size: 15px; font-weight: 800; width: 100%; cursor: pointer; border: none;
+}
+#loading {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1000; gap: 20px;
+}
+#loading .logo { font-size: 80px; animation: bounce 1s ease-in-out infinite; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+#loading .text { color: var(--text2); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+.hidden { display: none !important; }
+@media (max-width: 400px) {
+  .coin-btn { width: 240px; height: 240px; }
+  .coin-emoji { font-size: 100px; }
+  .balance { font-size: 34px; }
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="logo">🚽</div>
+  <div class="text">Скибиди-загрузка...</div>
+</div>
+
+<div id="app-scroll">
+  <div class="app">
+    <div class="header">
+      <div class="header-user">
+        <div class="avatar">🚽</div>
+        <div>
+          <div class="username" id="username">Скибиди-Мастер</div>
+          <div class="user-status">онлайн</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" data-tap="prophecy" title="Пророчество">
+          <svg viewBox="0 0 24 24"><path d="M12 2L15 9l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>
+        </button>
+        <button class="icon-btn" data-tap="friends-tab" title="Друзья">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="badge-dot" id="friend-badge" style="display:none">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="coin-section">
+      <div class="balance-label">скибиди-койны</div>
+      <div class="balance">
+        <span class="coin-icon">🚽</span>
+        <span id="balance-value">0</span>
+      </div>
+      <div class="income-row">
+        <div class="income-item"><span>👆</span><span>за тап: <b id="tap-value">1</b></span></div>
+        <div class="income-item"><span>💤</span><span>в сек: <b id="passive-value">0</b></span></div>
+      </div>
+    </div>
+
+    <div class="coin-area">
+      <div class="combo" id="combo">x1</div>
+      <button class="coin-btn" id="coin-btn">
+        <div class="coin-inner">
+          <span class="coin-emoji" id="coin-emoji">🚽</span>
+        </div>
+      </button>
+      <div class="energy-display">
+        <span>⚡</span>
+        <b id="energy-value">1000</b>
+        <span style="color: var(--text3)">/</span>
+        <span id="energy-max">1000</span>
+      </div>
+    </div>
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="upgrades">⚙️ Апгрейды</button>
+      <button class="tab-btn" data-tab="boosters">🚀 Бустеры</button>
+      <button class="tab-btn" data-tab="friends">👥 Друзья</button>
+      <button class="tab-btn" data-tab="achievements">🏆 Ачивки</button>
+      <button class="tab-btn" data-tab="skins">🎨 Скины</button>
+      <button class="tab-btn" data-tab="leaders">📊 Топ</button>
+    </div>
+
+    <div class="section active" id="section-upgrades">
+      <div class="daily-card">
+        <div class="daily-title">🎁 Ежедневный бонус</div>
+        <div class="daily-desc">Забери награду за вход</div>
+        <button class="daily-btn" id="daily-btn" data-tap="daily">Забрать</button>
+      </div>
+      <div class="section-title">🏗️ Постройки Скибиди</div>
+      <div id="upgrades-list"></div>
+    </div>
+
+    <div class="section" id="section-boosters">
+      <div class="prophecy">
+        <div class="prophecy-label">🔮 Скибиди-пророчество</div>
+        <div class="prophecy-text" id="prophecy-text">Загрузка...</div>
+      </div>
+      <div class="section-title">🚀 Бустеры</div>
+      <div id="boosters-list"></div>
+    </div>
+
+    <div class="section" id="section-friends">
+      <div class="ref-hero">
+        <div class="emoji">🎉</div>
+        <h3>Приглашай друзей — получай бонусы</h3>
+        <p>За каждого друга ты получаешь <b style="color:var(--accent)">+5% к пассивному доходу</b> навсегда.</p>
+        <div class="ref-bonus-row">
+          <div class="ref-bonus">🪙 ты: <b>+25000</b></div>
+          <div class="ref-bonus">🎁 друг: <b>+5000</b></div>
+          <div class="ref-bonus">📈 бонус: <b>+5%</b></div>
+        </div>
+      </div>
+      <div class="code-box">
+        <div class="code-label">твой реферальный код</div>
+        <div class="code-value" id="my-code">SKB-XXXXXX</div>
+        <button class="btn-copy" data-tap="copy-ref">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Скопировать ссылку
+        </button>
+      </div>
+      <div class="section-title">👥 Твои друзья (<span id="friends-count">0</span>)</div>
+      <div id="friends-list"></div>
+    </div>
+
+    <div class="section" id="section-achievements">
+      <div class="section-title">🏆 Достижения (<span id="ach-count">0</span>)</div>
+      <div id="achievements-list"></div>
+    </div>
+
+    <div class="section" id="section-skins">
+      <div class="section-title">🎨 Скины монеты</div>
+      <div class="skins-grid" id="skins-grid"></div>
+    </div>
+
+    <div class="section" id="section-leaders">
+      <div class="section-title">📊 Топ игроков мира</div>
+      <div id="leaders-list"></div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="bottom-nav-btn active" data-nav="game">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+    Игра
+  </button>
+  <button class="bottom-nav-btn" data-nav="friends">
+    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Друзья
+  </button>
+  <button class="bottom-nav-btn" data-nav="skins">
+    <svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+    Скины
+  </button>
+  <button class="bottom-nav-btn" data-nav="leaders">
+    <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    Топ
+  </button>
+</nav>
+
+<div class="modal-bg" id="offline-modal">
+  <div class="modal">
+    <div class="modal-emoji">💤🚽</div>
+    <div class="modal-title">Пока тебя не было...</div>
+    <div class="modal-desc">Скибиди работал за тебя:</div>
+    <div class="modal-bonus" id="offline-amount">+0</div>
+    <button class="btn-primary" data-tap="close-offline">Забрать</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="daily-modal">
+  <div class="modal">
+    <div class="modal-emoji">🎁</div>
+    <div class="modal-title">Ежедневный бонус!</div>
+    <div class="modal-bonus" id="daily-amount">+0</div>
+    <button class="btn-primary" data-tap="close-daily">Круто!</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="ach-modal">
+  <div class="modal">
+    <div class="modal-emoji">🏆</div>
+    <div class="modal-title">Достижение!</div>
+    <div class="modal-desc" id="ach-name">—</div>
+    <div class="modal-bonus" id="ach-reward">+0</div>
+    <button class="btn-primary" data-tap="close-ach">Отлично!</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="prophecy-modal">
+  <div class="modal">
+    <div class="modal-emoji">🔮</div>
+    <div class="modal-title">Скибиди-пророчество</div>
+    <div class="modal-desc" id="prophecy-modal-text">...</div>
+    <button class="btn-primary" data-tap="close-prophecy">Понял</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SKIBIDI_PHRASES = [
+  'бррр скибиди', 'дай ещё', 'я туалет — ты человек', 'тун тун тун',
+  'ты меня не слышишь', 'добрый день', 'дамбамбам', 'чтобы я был богат',
+  'братан, ну ты даёшь', 'скибиди-доп-доп', 'дай сюда', 'я всё вижу',
+  'не спами!', 'ты мой лучший друг', 'бррр-бам', 'ну и темп',
+  'ойойой', 'какой ты быстрый', 'я богаче тебя', 'опять тапаешь?'
+];
+
+const PROPHECIES = [
+  '🔥 Сегодня твой тап в 2 раза сильнее!',
+  '💀 Сегодня Скибиди-Туалет злится — не спамь.',
+  '💰 Через час придёт неожиданный доход.',
+  '🌟 Удача на твоей стороне, друг!',
+  '👀 Кто-то из друзей тебя опережает...',
+  '🎁 Скоро тебя ждёт подарок судьбы.',
+  '🚽 Скибиди-Туалет доволен тобой.',
+  '⚡ Энергия сегодня восстанавливается быстрее.',
+  '😈 Осторожно, соперники рядом.',
+  '🎉 Настал твой звёздный день!'
+];
+
+const UPGRADE_META = {
+  turbo:        { name: 'Турбо-кнопка',          desc: '+1 к тапу',           emoji: '⚡', c1: '#00e676', c2: '#00c853', base: 100,     mult: 1.6, effect: 1, type: 'tap' },
+  energy_max:   { name: 'Расширение энергии',    desc: '+500 макс. энергии',  emoji: '🔋', c1: '#3b82f6', c2: '#1d4ed8', base: 200,     mult: 1.7, effect: 500, type: 'energy' },
+  energy_regen: { name: 'Регенератор',           desc: '+1 регенерация',      emoji: '♻️', c1: '#10b981', c2: '#059669', base: 500,     mult: 1.8, effect: 1, type: 'regen' },
+  gen1:         { name: 'Скибиди-генератор',     desc: '+1 монета/сек',       emoji: '🛠️', c1: '#f59e0b', c2: '#d97706', base: 300,     mult: 1.5, effect: 1, type: 'passive' },
+  gen2:         { name: 'Скибиди-фабрика',       desc: '+15 монет/сек',       emoji: '🏭', c1: '#ec4899', c2: '#be185d', base: 3000,    mult: 1.5, effect: 15, type: 'passive' },
+  gen3:         { name: 'Скибиди-мегаполис',     desc: '+200 монет/сек',      emoji: '🌆', c1: '#8b5cf6', c2: '#6d28d9', base: 30000,   mult: 1.5, effect: 200, type: 'passive' },
+  gen4:         { name: 'Скибиди-космостанция',  desc: '+2 500 монет/сек',    emoji: '🛸', c1: '#06b6d4', c2: '#0891b2', base: 250000,  mult: 1.5, effect: 2500, type: 'passive' },
+  gen5:         { name: 'Скибиди-планета',       desc: '+30 000 монет/сек',   emoji: '🪐', c1: '#a855f7', c2: '#7c3aed', base: 3000000, mult: 1.5, effect: 30000, type: 'passive' },
+  gen6:         { name: 'Скибиди-галактика',     desc: '+400 000 монет/сек',  emoji: '🌌', c1: '#6366f1', c2: '#4f46e5', base: 50000000, mult: 1.5, effect: 400000, type: 'passive' }
+};
+
+const ACHIEVEMENTS_META = {
+  first_tap:    { name: 'Первый тап',       emoji: '👆', reward: 100 },
+  tap_100:      { name: 'Ста клик',         emoji: '💯', reward: 500 },
+  tap_1000:     { name: 'Тапальщик-мастер', emoji: '🔥', reward: 5000 },
+  tap_10000:    { name: 'Скибиди-легенда',  emoji: '👑', reward: 50000 },
+  combo_5:      { name: 'Скибиди-комбо',    emoji: '⚡', reward: 1000 },
+  first_friend: { name: 'Первый друг',      emoji: '🤝', reward: 10000 },
+  five_friends: { name: 'Пять друзей',      emoji: '🎉', reward: 50000 },
+  rich:         { name: 'Скибиди-богач',    emoji: '💰', reward: 100000 }
+};
+
+const SKINS_META = {
+  default: { name: 'Классика',    emoji: '🚽', price: 0 },
+  gold:    { name: 'Золотой',     emoji: '🥇', price: 50000 },
+  diamond: { name: 'Алмазный',    emoji: '💎', price: 500000 },
+  mythic:  { name: 'Мифический',  emoji: '🔥', price: 5000000 },
+  cosmic:  { name: 'Космический', emoji: '🌌', price: 25000000 },
+  rainbow: { name: 'Радужный',    emoji: '🌈', price: 100000000 }
+};
+
+let state = {
+  user: null,
+  passive: 0,
+  currentCombo: 0,
+  lastTapTime: 0,
+  pendingTaps: 0,
+  pendingCombo: 1,
+  fiestaUntil: 0,
+  tapTimestamps: []
+};
+
+async function api(endpoint, data) {
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch (e) {
+    console.error('API error:', e);
+    return { error: 'network' };
+  }
+}
+
+function getSavedCode() { return localStorage.getItem('skibidi_code'); }
+function saveCode(code) { localStorage.setItem('skibidi_code', code); }
+
+async function initGame() {
+  const savedCode = getSavedCode();
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+
+  const res = await api('/api/register', { code: savedCode, ref });
+  if (res.error) {
+    toast('Ошибка связи с сервером');
+    return;
+  }
+  state.user = res.user;
+  saveCode(state.user.code);
+
+  if (res.offline_income > 0) {
+    document.getElementById('offline-amount').textContent = '+' + formatNum(res.offline_income);
+    document.getElementById('offline-modal').classList.add('show');
+  }
+
+  document.getElementById('my-code').textContent = state.user.code;
+  document.getElementById('username').textContent = state.user.name;
+
+  renderAll();
+  document.getElementById('loading').classList.add('hidden');
+
+  if (!savedCode) {
+    setTimeout(() => toast('🚽 Добро пожаловать в Скибиди!'), 800);
+    setTimeout(() => toast('👆 Тапай монету, чтобы заработать'), 3500);
+  }
+}
+
+async function syncTaps() {
+  if (state.pendingTaps <= 0) return;
+  const taps = state.pendingTaps;
+  const combo = state.pendingCombo;
+  state.pendingTaps = 0;
+
+  const res = await api('/api/tap', { code: state.user.code, taps, combo });
+  if (res.error === 'no energy') {
+    state.user.energy = 0;
+    updateUI();
+    return;
+  }
+  if (res.user) {
+    state.user = res.user;
+    state.passive = res.passive;
+    updateUI();
+  }
+  if (res.new_achievements && res.new_achievements.length) {
+    res.new_achievements.forEach(a => showAchievement(a));
+  }
+}
+
+function tapCoin(e) {
+  const u = state.user;
+  if (!u) return;
+  if (u.energy < 1) {
+    if (Math.random() < 0.1) toast('⚡ Энергия кончилась!');
+    return;
+  }
+
+  const now = Date.now();
+  if (now - state.lastTapTime < 700) state.currentCombo++;
+  else state.currentCombo = 1;
+  state.lastTapTime = now;
+
+  state.tapTimestamps.push(now);
+  state.tapTimestamps = state.tapTimestamps.filter(t => now - t < 1000);
+  if (state.tapTimestamps.length >= 10 && state.fiestaUntil < now) {
+    state.fiestaUntil = now + 30000;
+    document.body.classList.add('fiesta-active');
+    toast('🎉 СКИБИДИ-ФИЕСТА! x3 на 30 сек!');
+    setTimeout(() => document.body.classList.remove('fiesta-active'), 30000);
+  }
+
+  let mult = 1;
+  if (state.currentCombo >= 20) mult = 5;
+  else if (state.currentCombo >= 10) mult = 3;
+  else if (state.currentCombo >= 5) mult = 2;
+
+  const fiestaMult = state.fiestaUntil > now ? 3 : 1;
+
+  let baseTap = u.tap_power;
+  Object.keys(UPGRADE_META).forEach(id => {
+    if (UPGRADE_META[id].type === 'tap') {
+      baseTap += (u.upgrades[id] || 0) * UPGRADE_META[id].effect;
+    }
+  });
+  const gain = baseTap * mult * fiestaMult;
+
+  u.balance += gain;
+  u.energy -= 1;
+  u.total_taps += 1;
+
+  state.pendingTaps += 1;
+  state.pendingCombo = state.currentCombo;
+
+  const btn = document.getElementById('coin-btn');
+  btn.classList.add('tapping', 'skibidi-brr');
+  setTimeout(() => btn.classList.remove('tapping'), 100);
+  setTimeout(() => btn.classList.remove('skibidi-brr'), 320);
+
+  spawnFloatText(e, '+' + formatNum(gain));
+  if (Math.random() < 0.15) {
+    spawnFloatText(e, SKIBIDI_PHRASES[Math.floor(Math.random() * SKIBIDI_PHRASES.length)], true);
+  }
+
+  updateCombo();
+  updateUI();
+}
+
+function spawnFloatText(e, text, isSkibidi = false) {
+  const area = document.querySelector('.coin-area');
+  const rect = area.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'float-text' + (isSkibidi ? ' skibidi' : '');
+  el.textContent = text;
+  let x, y;
+  if (e && e.clientX) {
+    x = e.clientX - rect.left;
+    y = e.clientY - rect.top;
+  } else {
+    x = rect.width / 2;
+    y = rect.height / 2;
+  }
+  el.style.left = (x - 40) + 'px';
+  el.style.top = (y - 30) + 'px';
+  area.appendChild(el);
+  setTimeout(() => el.remove(), 1100);
+}
+
+function updateCombo() {
+  const combo = document.getElementById('combo');
+  let mult = 1;
+  if (state.currentCombo >= 20) mult = 5;
+  else if (state.currentCombo >= 10) mult = 3;
+  else if (state.currentCombo >= 5) mult = 2;
+  if (state.currentCombo >= 3) {
+    combo.textContent = 'x' + mult + ' COMBO';
+    combo.classList.add('show');
+  } else {
+    combo.classList.remove('show');
+  }
+}
+
+function formatNum(n) {
+  n = Math.floor(n);
+  if (n < 1000) return n.toString();
+  if (n < 1_000_000) return (n / 1000).toFixed(1).replace('.0', '') + 'K';
+  if (n < 1_000_000_000) return (n / 1_000_000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  if (n < 1_000_000_000_000) return (n / 1_000_000_000).toFixed(2).replace(/\.?0+$/, '') + 'B';
+  return (n / 1_000_000_000_000).toFixed(2) + 'T';
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'только что';
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' мин назад';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + ' ч назад';
+  return Math.floor(diff / 86400000) + ' дн назад';
+}
+
+function updateUI() {
+  const u = state.user;
+  if (!u) return;
+  document.getElementById('balance-value').textContent = formatNum(u.balance);
+  document.getElementById('energy-value').textContent = Math.floor(u.energy);
+  document.getElementById('energy-max').textContent = u.energy_max;
+
+  let passive = 0;
+  Object.keys(UPGRADE_META).forEach(id => {
+    if (UPGRADE_META[id].type === 'passive') {
+      passive += (u.upgrades[id] || 0) * UPGRADE_META[id].effect;
+    }
+  });
+  const refBonus = 1 + u.referrals.length * 0.05;
+  passive = Math.floor(passive * refBonus);
+  state.passive = passive;
+  document.getElementById('passive-value').textContent = formatNum(passive);
+
+  let baseTap = u.tap_power;
+  Object.keys(UPGRADE_META).forEach(id => {
+    if (UPGRADE_META[id].type === 'tap') {
+      baseTap += (u.upgrades[id] || 0) * UPGRADE_META[id].effect;
+    }
+  });
+  document.getElementById('tap-value').textContent = formatNum(baseTap);
+
+  const skin = SKINS_META[u.current_skin] || SKINS_META.default;
+  document.getElementById('coin-emoji').textContent = skin.emoji;
+
+  const fb = document.getElementById('friend-badge');
+  if (u.referrals.length > 0) {
+    fb.style.display = 'flex';
+    fb.textContent = u.referrals.length;
+  } else {
+    fb.style.display = 'none';
+  }
+
+  const dailyBtn = document.getElementById('daily-btn');
+  const now = Date.now() / 1000;
+  const canDaily = (now - u.last_daily) > 24 * 3600;
+  dailyBtn.disabled = !canDaily;
+  if (!canDaily) {
+    const left = 24 * 3600 - (now - u.last_daily);
+    const h = Math.floor(left / 3600);
+    const m = Math.floor((left % 3600) / 60);
+    dailyBtn.textContent = h + 'ч ' + m + 'м';
+  } else {
+    dailyBtn.textContent = 'Забрать';
+  }
+}
+
+function renderAll() {
+  updateUI();
+  renderUpgrades();
+  renderAchievements();
+  renderSkins();
+  renderFriends();
+  renderBoosters();
+  renderLeaders();
+  updateProphecy();
+}
+
+function renderUpgrades() {
+  const list = document.getElementById('upgrades-list');
+  const u = state.user;
+  list.innerHTML = Object.keys(UPGRADE_META).map(id => {
+    const t = UPGRADE_META[id];
+    const lvl = u.upgrades[id] || 0;
+    const price = Math.floor(t.base * Math.pow(t.mult, lvl));
+    const canAfford = u.balance >= price;
+    let effectText;
+    if (t.type === 'tap') effectText = '+' + t.effect + ' к тапу';
+    else if (t.type === 'energy') effectText = '+' + t.effect + ' энергии';
+    else if (t.type === 'regen') effectText = '+' + t.effect + '/сек реген';
+    else effectText = '+' + t.effect + '/сек доход';
+    return '<div class="upgrade-card" data-upgrade="' + id + '">' +
+      '<div class="upgrade-icon" style="--u1:' + t.c1 + ';--u2:' + t.c2 + '">' + t.emoji +
+      (lvl > 0 ? '<span class="lvl">' + lvl + '</span>' : '') + '</div>' +
+      '<div class="upgrade-body">' +
+      '<div class="upgrade-name">' + t.name + '</div>' +
+      '<div class="upgrade-desc">' + t.desc + '</div>' +
+      '<div class="upgrade-effect">' + effectText + '</div></div>' +
+      '<div class="upgrade-price ' + (canAfford ? 'can-afford' : '') + '">🚽 ' + formatNum(price) + '</div></div>';
+  }).join('');
+}
+
+async function buyUpgrade(id) {
+  const res = await api('/api/upgrade', { code: state.user.code, upgrade_id: id });
+  if (res.error) {
+    if (res.error === 'no money') toast('💸 Не хватает монет');
+    return;
+  }
+  state.user = res.user;
+  state.passive = res.passive;
+  renderUpgrades();
+  updateUI();
+  toast('✅ Прокачано');
+  if (res.new_achievements && res.new_achievements.length) {
+    res.new_achievements.forEach(a => showAchievement(a));
+  }
+}
+
+async function claimDaily() {
+  const res = await api('/api/daily', { code: state.user.code });
+  if (res.error === 'cooldown') { toast('⏳ Ещё не время'); return; }
+  if (res.error) return;
+  state.user = res.user;
+  document.getElementById('daily-amount').textContent = '+' + formatNum(res.amount);
+  document.getElementById('daily-modal').classList.add('show');
+  updateUI();
+}
+
+function showAchievement(ach) {
+  document.getElementById('ach-name').textContent = ach.name;
+  document.getElementById('ach-reward').textContent = '+' + formatNum(ach.reward);
+  document.getElementById('ach-modal').classList.add('show');
+}
+
+function renderAchievements() {
+  const list = document.getElementById('achievements-list');
+  const u = state.user;
+  list.innerHTML = Object.keys(ACHIEVEMENTS_META).map(id => {
+    const a = ACHIEVEMENTS_META[id];
+    const done = u.achievements.includes(id);
+    return '<div class="achievement ' + (done ? 'done' : '') + '">' +
+      '<div class="ach-icon">' + a.emoji + '</div>' +
+      '<div class="ach-body"><div class="ach-name">' + a.name + '</div></div>' +
+      '<div class="ach-reward">+' + formatNum(a.reward) + '</div></div>';
+  }).join('');
+  document.getElementById('ach-count').textContent = u.achievements.length;
+}
+
+function renderFriends() {
+  const u = state.user;
+  document.getElementById('friends-count').textContent = u.referrals.length;
+  const list = document.getElementById('friends-list');
+  if (!u.referrals.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text3)">' +
+      '<div style="font-size:48px;margin-bottom:12px">👥</div>' +
+      '<div style="font-size:14px">Пока никого нет</div>' +
+      '<div style="font-size:12px;margin-top:6px">Скинь ссылку друзьям — получай бонусы</div></div>';
+    return;
+  }
+  list.innerHTML = u.referrals.map(r =>
+    '<div class="friend-item">' +
+    '<div class="friend-avatar">🚽</div>' +
+    '<div class="friend-info"><div class="friend-name">' + (r.name || 'Игрок') + '</div>' +
+    '<div class="friend-meta">' + r.code + ' · ' + timeAgo(r.joined_at * 1000) + '</div></div>' +
+    '<div class="friend-bonus">+5%<small>к доходу</small></div></div>'
+  ).join('');
+}
+
+function copyRefLink() {
+  const url = new URL(window.location.href);
+  url.search = '?ref=' + state.user.code;
+  const link = url.toString();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(() => {
+      toast('🔗 Ссылка скопирована!');
+    }).catch(() => {
+      prompt('Скопируй ссылку:', link);
+    });
+  } else {
+    prompt('Скопируй ссылку:', link);
+  }
+}
+
+function renderSkins() {
+  const u = state.user;
+  const grid = document.getElementById('skins-grid');
+  grid.innerHTML = Object.keys(SKINS_META).map(id => {
+    const s = SKINS_META[id];
+    const owned = u.owned_skins.includes(id);
+    const active = u.current_skin === id;
+    return '<div class="skin ' + (active ? 'active' : '') + ' ' + (owned ? 'owned' : '') + '" data-skin="' + id + '">' +
+      '<div class="skin-emoji">' + s.emoji + '</div>' +
+      '<div class="skin-name">' + s.name + '</div>' +
+      '<div class="skin-price">' + (active ? '✓ активно' : owned ? 'выбрать' : formatNum(s.price) + ' 🚽') + '</div></div>';
+  }).join('');
+}
+
+async function selectSkin(id) {
+  const res = await api('/api/skin', { code: state.user.code, skin_id: id });
+  if (res.error === 'no money') { toast('💸 Не хватает монет'); return; }
+  if (res.error) return;
+  state.user = res.user;
+  renderSkins();
+  updateUI();
+  toast('🎨 Скин применён');
+}
+
+async function renderLeaders() {
+  const list = document.getElementById('leaders-list');
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3)">Загрузка...</div>';
+  try {
+    const res = await fetch('/api/leaderboard');
+    const data = await res.json();
+    const myCode = state.user.code;
+    list.innerHTML = data.top.map((p, i) => {
+      const rank = i + 1;
+      let rankClass = '';
+      if (rank === 1) rankClass = 'top1';
+      else if (rank === 2) rankClass = 'top2';
+      else if (rank === 3) rankClass = 'top3';
+      const isMe = p.code === myCode;
+      return '<div class="leader-row ' + (isMe ? 'me' : '') + '">' +
+        '<div class="leader-rank ' + rankClass + '">' + (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank) + '</div>' +
+        '<div class="leader-avatar">🚽</div>' +
+        '<div class="leader-name">' + (isMe ? 'Ты' : p.name) + '</div>' +
+        '<div class="leader-score">' + formatNum(p.balance) + '</div></div>';
+    }).join('') || '<div style="text-align:center;padding:20px;color:var(--text3)">Пока пусто</div>';
+  } catch (e) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3)">Ошибка загрузки</div>';
+  }
+}
+
+function updateProphecy() {
+  const el = document.getElementById('prophecy-text');
+  const prophecy = PROPHECIES[Math.floor(Math.random() * PROPHECIES.length)];
+  el.textContent = prophecy;
+  el.dataset.prophecy = prophecy;
+}
+
+function openProphecy() {
+  updateProphecy();
+  document.getElementById('prophecy-modal-text').textContent = document.getElementById('prophecy-text').dataset.prophecy;
+  document.getElementById('prophecy-modal').classList.add('show');
+}
+
+function renderBoosters() {
+  const list = document.getElementById('boosters-list');
+  const u = state.user;
+  list.innerHTML =
+    '<div class="upgrade-card" data-booster="tap">' +
+    '<div class="upgrade-icon" style="--u1:#f59e0b;--u2:#d97706">💥</div>' +
+    '<div class="upgrade-body"><div class="upgrade-name">Мощный тап</div>' +
+    '<div class="upgrade-desc">Удвоить доход за тап на 60 сек</div></div>' +
+    '<div class="upgrade-price ' + (u.balance >= 25000 ? 'can-afford' : '') + '">🚽 25K</div></div>' +
+    '<div class="upgrade-card" data-booster="energy">' +
+    '<div class="upgrade-icon" style="--u1:#3b82f6;--u2:#1d4ed8">⚡</div>' +
+    '<div class="upgrade-body"><div class="upgrade-name">Энергетик</div>' +
+    '<div class="upgrade-desc">Мгновенно восполняет энергию</div></div>' +
+    '<div class="upgrade-price ' + (u.balance >= 10000 ? 'can-afford' : '') + '">🚽 10K</div></div>' +
+    '<div class="upgrade-card" data-booster="fiesta">' +
+    '<div class="upgrade-icon" style="--u1:#ec4899;--u2:#be185d">🎉</div>' +
+    '<div class="upgrade-body"><div class="upgrade-name">Скибиди-фиеста</div>' +
+    '<div class="upgrade-desc">Доход x3 на 30 секунд</div></div>' +
+    '<div class="upgrade-price ' + (u.balance >= 100000 ? 'can-afford' : '') + '">🚽 100K</div></div>';
+}
+
+function buyBooster(type) {
+  const u = state.user;
+  if (type === 'tap') {
+    if (u.balance < 25000) return toast('💸 Не хватает монет');
+    u.balance -= 25000;
+    toast('💥 Мощный тап на 60 сек!');
+  } else if (type === 'energy') {
+    if (u.balance < 10000) return toast('💸 Не хватает монет');
+    u.balance -= 10000;
+    u.energy = u.energy_max;
+    toast('⚡ Энергия восстановлена!');
+  } else if (type === 'fiesta') {
+    if (u.balance < 100000) return toast('💸 Не хватает монет');
+    u.balance -= 100000;
+    state.fiestaUntil = Date.now() + 30000;
+    document.body.classList.add('fiesta-active');
+    toast('🎉 Фиеста! x3 на 30 сек');
+    setTimeout(() => document.body.classList.remove('fiesta-active'), 30000);
+  }
+  updateUI();
+  renderBoosters();
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function handleAction(action) {
+  if (action === 'prophecy') openProphecy();
+  else if (action === 'friends-tab') switchTab('friends');
+  else if (action === 'copy-ref') copyRefLink();
+  else if (action === 'daily') claimDaily();
+  else if (action === 'close-offline') document.getElementById('offline-modal').classList.remove('show');
+  else if (action === 'close-daily') document.getElementById('daily-modal').classList.remove('show');
+  else if (action === 'close-ach') document.getElementById('ach-modal').classList.remove('show');
+  else if (action === 'close-prophecy') document.getElementById('prophecy-modal').classList.remove('show');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  if (name === 'friends') renderFriends();
+  if (name === 'achievements') renderAchievements();
+  if (name === 'skins') renderSkins();
+  if (name === 'leaders') renderLeaders();
+  if (name === 'boosters') renderBoosters();
+  if (name === 'upgrades') renderUpgrades();
+}
+
+function switchNav(name) {
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.nav === name));
+  if (name === 'game') switchTab('upgrades');
+  else if (name === 'friends') switchTab('friends');
+  else if (name === 'skins') switchTab('skins');
+  else if (name === 'leaders') switchTab('leaders');
+}
+
+function bindAllTaps() {
+  const coinBtn = document.getElementById('coin-btn');
+  coinBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    tapCoin(e);
+  });
+
+  document.querySelectorAll('[data-tap]').forEach(el => {
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      handleAction(el.dataset.tap);
+    });
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(el => {
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      switchTab(el.dataset.tab);
+    });
+  });
+
+  document.querySelectorAll('.bottom-nav-btn').forEach(el => {
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      switchNav(el.dataset.nav);
+    });
+  });
+
+  document.getElementById('upgrades-list').addEventListener('pointerdown', (e) => {
+    const card = e.target.closest('[data-upgrade]');
+    if (card) { e.preventDefault(); buyUpgrade(card.dataset.upgrade); }
+  });
+
+  document.getElementById('boosters-list').addEventListener('pointerdown', (e) => {
+    const card = e.target.closest('[data-booster]');
+    if (card) { e.preventDefault(); buyBooster(card.dataset.booster); }
+  });
+
+  document.getElementById('skins-grid').addEventListener('pointerdown', (e) => {
+    const skin = e.target.closest('[data-skin]');
+    if (skin) { e.preventDefault(); selectSkin(skin.dataset.skin); }
+  });
+}
+
+function startTicks() {
+  setInterval(syncTaps, 1000);
+
+  setInterval(() => {
+    if (state.user && state.passive > 0) {
+      state.user.balance += state.passive;
+      updateUI();
+    }
+  }, 1000);
+
+  setInterval(() => {
+    if (state.user && state.user.energy < state.user.energy_max) {
+      state.user.energy = Math.min(state.user.energy_max, state.user.energy + state.user.energy_regen);
+      updateUI();
+    }
+  }, 1000);
+
+  setInterval(async () => {
+    if (!state.user) return;
+    const res = await api('/api/state', { code: state.user.code });
+    if (res.user) {
+      state.user = res.user;
+      state.passive = res.passive;
+      updateUI();
+    }
+  }, 10000);
+
+  setInterval(() => {
+    if (Math.random() < 0.3) {
+      toast(SKIBIDI_PHRASES[Math.floor(Math.random() * SKIBIDI_PHRASES.length)]);
+    }
+  }, 60000);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  bindAllTaps();
+  await initGame();
+  startTicks();
+});
+</script>
+
+</body>
+</html>
